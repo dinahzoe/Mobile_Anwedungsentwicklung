@@ -11,6 +11,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/app/aufgabe1" />
             <option value="$PROJECT_DIR$/app/aufgabe1_textformatierung" />
             <option value="$PROJECT_DIR$/app/aufgabe2_farbbalken" />
             <option value="$PROJECT_DIR$/app/aufgabe3_temperaturumrechnung" />

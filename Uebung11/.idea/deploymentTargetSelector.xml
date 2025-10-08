@@ -17,6 +17,9 @@
       <SelectionState runConfigName="app.aufgabe1_textformatierung">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="app.aufgabe1">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>

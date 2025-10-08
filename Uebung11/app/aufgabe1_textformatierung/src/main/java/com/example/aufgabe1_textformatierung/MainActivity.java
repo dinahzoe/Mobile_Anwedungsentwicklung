@@ -2,8 +2,6 @@ package com.example.aufgabe1_textformatierung;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import android.widget.TextView;
-import android.graphics.Typeface;
 
 public class MainActivity extends AppCompatActivity {
 
