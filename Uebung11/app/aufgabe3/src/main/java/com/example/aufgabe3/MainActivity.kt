@@ -1,131 +1,108 @@
 package com.example.aufgabe3
 
-import android.graphics.Color
 import android.os.Bundle
-import android.view.Gravity
-import android.view.View
-import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.setPadding
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 
-class MainActivity : AppCompatActivity() {
-
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val rootLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL
-            setBackgroundColor(Color.parseColor("#FAFAFA"))
-            setPadding(24)
-        }
-
-        val title = TextView(this).apply {
-            text = "Temperaturumrechner"
-            textSize = 28f
-            setTextColor(Color.BLACK)
-            setPadding(0, 0, 0, 32)
-            setTypeface(null, android.graphics.Typeface.BOLD)
-        }
-        rootLayout.addView(title)
-
-        val inputLayout = LinearLayout(this).apply {
-            setPadding(12)
-            setBackgroundColor(Color.WHITE)
-            setMargins(0, 0, 0, 32)
-        }
-
-        val inputValue = EditText(this).apply {
-            hint = "Wert hier bitte eingeben"
-            textSize = 20f
-            setTypeface(null, android.graphics.Typeface.BOLD)
-            setPadding(12)
-        }
-
-        inputLayout.addView(inputValue)
-        rootLayout.addView(inputLayout)
-
-        val btnCtoF = Button(this).apply {
-            text = "Celsius → Fahrenheit"
-            setBackgroundColor(Color.parseColor("#FF9800"))
-            setTextColor(Color.WHITE)
-            textSize = 18f
-            setPadding(0,16,0,16)
-        }
-        val btnFtoC = Button(this).apply {
-            text = "Fahrenheit → Celsius"
-            setBackgroundColor(Color.parseColor("#03A9F4"))
-            setTextColor(Color.WHITE)
-            textSize = 18f
-            setPadding(0,16,0,16)
-        }
-
-        rootLayout.addView(btnCtoF)
-        rootLayout.addView(btnFtoC)
-
-        val spacer = View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                100
-            )
-        }
-        rootLayout.addView(spacer)
-
-        val resultLayout = LinearLayout(this).apply {
-            setBackgroundColor(Color.parseColor("#E0E0E0"))
-            gravity = Gravity.CENTER
-            orientation = LinearLayout.VERTICAL
-            setPadding(20)
-        }
-
-        val result = TextView(this).apply {
-            text = "Umgewandelter Wert"
-            textSize = 22f
-            setTextColor(Color.BLACK)
-        }
-
-        resultLayout.addView(result)
-        rootLayout.addView(resultLayout)
-
-        setContentView(rootLayout)
-
-        btnCtoF.setOnClickListener {
-            val input = inputValue.text.toString().trim()
-            if (input.isEmpty()) {
-                Toast.makeText(this, "Bitte geben Sie einen Wert ein", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            try {
-                val c = input.toDouble()
-                val f = c * 9 / 5 + 32
-                result.text = "Ergebnis: $f °F"
-            } catch (e: NumberFormatException) {
-                Toast.makeText(this, "Ungültiger Wert", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        btnFtoC.setOnClickListener {
-            val input = inputValue.text.toString().trim()
-            if (input.isEmpty()) {
-                Toast.makeText(this, "Bitte geben Sie einen Wert ein", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            try {
-                val f = input.toDouble()
-                val c = (f - 32) * 5 / 9
-                result.text = "Ergebnis: $c °C"
-            } catch (e: NumberFormatException) {
-                Toast.makeText(this, "Ungültiger Wert", Toast.LENGTH_SHORT).show()
-            }
+        setContent {
+            TemperatureConverterApp()
         }
     }
+}
 
-    private fun LinearLayout.setMargins(left: Int, top: Int, right: Int, bottom: Int) {
-        val params = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
+@Composable
+fun TemperatureConverterApp() {
+    var input by remember { mutableStateOf("") }
+    var result by remember { mutableStateOf("Umgewandelter Wert") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFFAFAFA))
+            .padding(horizontal = 24.dp, vertical = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Temperaturumrechner",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black,
+            modifier = Modifier.padding(bottom = 40.dp)
         )
-        params.setMargins(left, top, right, bottom)
-        layoutParams = params
+
+        OutlinedTextField(
+            value = input,
+            onValueChange = { input = it },
+            placeholder = { Text("Wert hier bitte eingeben") },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 40.dp)
+        )
+
+        Button(
+            onClick = {
+                val c = input.toDoubleOrNull()
+                result = if (c != null) "Ergebnis: ${c * 9 / 5 + 32} °F" else "Ungültiger Wert"
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
+                .height(75.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8BC34A)),
+            shape = RoundedCornerShape(6.dp)
+        ) {
+            Text("Celsius in Fahrenheit", fontSize = 20.sp, color = Color.White)
+        }
+
+        Button(
+            onClick = {
+                val f = input.toDoubleOrNull()
+                result = if (f != null) "Ergebnis: ${(f - 32) * 5 / 9} °C" else "Ungültiger Wert"
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 40.dp)
+                .height(75.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03A9F4)),
+            shape = RoundedCornerShape(6.dp)
+        ) {
+            Text("Fahrenheit in Celsius", fontSize = 20.sp, color = Color.White)
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = result,
+            fontSize = 22.sp,
+            color = Color.Black,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
+                .padding(24.dp)
+        )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TemperatureConverterPreview() {
+    TemperatureConverterApp()
 }
