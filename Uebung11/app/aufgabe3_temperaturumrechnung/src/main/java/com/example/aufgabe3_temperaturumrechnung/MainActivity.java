@@ -1,24 +1,41 @@
 package com.example.aufgabe3_temperaturumrechnung;
 
-import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.*;
 
 public class MainActivity extends AppCompatActivity {
+
+    EditText inputValue;
+    TextView result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+
+        inputValue = findViewById(R.id.inputValue);
+        result = findViewById(R.id.result);
+        Button btnCtoF = findViewById(R.id.btnCtoF);
+        Button btnFtoC = findViewById(R.id.btnFtoC);
+
+        btnCtoF.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                double c = Double.parseDouble(inputValue.getText().toString());
+                double f = c * 9 / 5 + 32;
+                result.setText("Ergebnis: " + f + " °F");
+            }
+        });
+
+        btnFtoC.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                double f = Double.parseDouble(inputValue.getText().toString());
+                double c = (f - 32) * 5 / 9;
+                result.setText("Ergebnis: " + c + " °C");
+            }
         });
     }
 }
