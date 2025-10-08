@@ -3,45 +3,70 @@ package com.example.aufgabe2
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.aufgabe2.ui.theme.Uebung11Theme
+import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            Uebung11Theme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+            FarbbalkenTheme {
+                FarbbalkenApp()
             }
         }
     }
 }
 
+private val LightColors = lightColorScheme()
+
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
+fun FarbbalkenTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = LightColors,
+        content = content
     )
+}
+
+@Composable
+fun FarbbalkenApp() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(0.dp)
+    ) {
+        val colors = listOf(
+            Color(0xFFFF5722),
+            Color(0xFF009688),
+            Color(0xFF673AB7),
+            Color(0xFF3F51B5),
+            Color(0xFF9C27B0),
+            Color(0xFFE91E63),
+            Color(0xFFFF9800),
+            Color(0xFF8BC34A)
+        )
+
+        colors.forEach { color ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .background(color)
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    Uebung11Theme {
-        Greeting("Android")
+fun FarbbalkenPreview() {
+    FarbbalkenTheme {
+        FarbbalkenApp()
     }
 }
