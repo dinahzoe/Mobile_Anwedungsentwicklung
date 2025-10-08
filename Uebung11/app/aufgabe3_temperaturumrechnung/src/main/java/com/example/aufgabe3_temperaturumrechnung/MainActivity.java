@@ -21,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
         btnCtoF = findViewById(R.id.btnCtoF);
         btnFtoC = findViewById(R.id.btnFtoC);
 
-        //Celsius in Fahrenheit
         btnCtoF.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

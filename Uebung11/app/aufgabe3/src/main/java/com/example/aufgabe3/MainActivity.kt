@@ -13,7 +13,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Root-Layout
         val rootLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
@@ -21,7 +20,6 @@ class MainActivity : AppCompatActivity() {
             setPadding(24)
         }
 
-        // Überschrift
         val title = TextView(this).apply {
             text = "Temperaturumrechner"
             textSize = 28f
@@ -31,7 +29,6 @@ class MainActivity : AppCompatActivity() {
         }
         rootLayout.addView(title)
 
-        // Eingabefeld
         val inputLayout = LinearLayout(this).apply {
             setPadding(12)
             setBackgroundColor(Color.WHITE)
@@ -48,7 +45,6 @@ class MainActivity : AppCompatActivity() {
         inputLayout.addView(inputValue)
         rootLayout.addView(inputLayout)
 
-        // Buttons
         val btnCtoF = Button(this).apply {
             text = "Celsius → Fahrenheit"
             setBackgroundColor(Color.parseColor("#FF9800"))
@@ -67,7 +63,6 @@ class MainActivity : AppCompatActivity() {
         rootLayout.addView(btnCtoF)
         rootLayout.addView(btnFtoC)
 
-        // Spacer
         val spacer = View(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -76,7 +71,6 @@ class MainActivity : AppCompatActivity() {
         }
         rootLayout.addView(spacer)
 
-        // Ergebniskasten
         val resultLayout = LinearLayout(this).apply {
             setBackgroundColor(Color.parseColor("#E0E0E0"))
             gravity = Gravity.CENTER
@@ -93,10 +87,8 @@ class MainActivity : AppCompatActivity() {
         resultLayout.addView(result)
         rootLayout.addView(resultLayout)
 
-        // Set content view
         setContentView(rootLayout)
 
-        // Button-Logik
         btnCtoF.setOnClickListener {
             val input = inputValue.text.toString().trim()
             if (input.isEmpty()) {
@@ -128,7 +120,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Extension-Funktion zum einfachen Setzen von Margin
     private fun LinearLayout.setMargins(left: Int, top: Int, right: Int, bottom: Int) {
         val params = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,

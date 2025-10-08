@@ -1,6 +1,5 @@
 package com.example.aufgabe4_taschenrechner;
 
-
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -29,23 +28,35 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        int[] numberIds = {R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4, R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9};
+        int[] numberIds = {R.id.btn0, R.id.btn1, R.id.btn2, R.id.btn3, R.id.btn4,
+                R.id.btn5, R.id.btn6, R.id.btn7, R.id.btn8, R.id.btn9};
         for (int id : numberIds) {
             findViewById(id).setOnClickListener(numberClick);
         }
 
+        // Operatoren
         findViewById(R.id.btnAdd).setOnClickListener(v -> setOperator("+"));
         findViewById(R.id.btnSub).setOnClickListener(v -> setOperator("-"));
         findViewById(R.id.btnMul).setOnClickListener(v -> setOperator("*"));
         findViewById(R.id.btnDiv).setOnClickListener(v -> setOperator("/"));
+
+        // Clear
         findViewById(R.id.btnC).setOnClickListener(v -> clear());
+
+        // Gleich
         findViewById(R.id.btnEq).setOnClickListener(v -> calculate());
     }
 
     void setOperator(String op) {
-        firstNumber = Double.parseDouble(current);
-        operator = op;
-        current = "";
+        if (current.isEmpty()) return; // nichts tun, wenn keine Zahl eingegeben
+        try {
+            firstNumber = Double.parseDouble(current);
+            operator = op;
+            current = "";
+        } catch (NumberFormatException e) {
+            display.setText("Error");
+            current = "";
+        }
     }
 
     void clear() {
@@ -56,17 +67,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void calculate() {
-        double second = Double.parseDouble(current);
-        double result = 0;
+        if (current.isEmpty() || operator.isEmpty()) return;
 
-        switch (operator) {
-            case "+": result = firstNumber + second; break;
-            case "-": result = firstNumber - second; break;
-            case "*": result = firstNumber * second; break;
-            case "/": result = firstNumber / second; break;
+        try {
+            double second = Double.parseDouble(current);
+            double result = 0;
+
+            switch (operator) {
+                case "+": result = firstNumber + second; break;
+                case "-": result = firstNumber - second; break;
+                case "*": result = firstNumber * second; break;
+                case "/":
+                    if (second == 0) {
+                        display.setText("Error");
+                        current = "";
+                        operator = "";
+                        return;
+                    }
+                    result = firstNumber / second;
+                    break;
+            }
+
+            if (result == (long) result)
+                display.setText(String.format("%d", (long) result));
+            else
+                display.setText(String.valueOf(result));
+
+            current = String.valueOf(result);
+            operator = "";
+        } catch (NumberFormatException e) {
+            display.setText("Error");
+            current = "";
         }
-
-        display.setText(String.valueOf(result));
-        current = String.valueOf(result);
     }
 }
