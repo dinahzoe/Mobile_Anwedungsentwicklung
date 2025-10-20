@@ -1,34 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
+    android:background="#472196F3"
     tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/textLatLng"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Breite / Länge: -"
-        android:textSize="18sp"
-        android:padding="8dp"/>
+        android:orientation="vertical"
+        android:padding="50dp"
+        android:gravity="center_horizontal">
 
-    <TextView
-        android:id="@+id/textAltitude"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Höhe: -"
-        android:textSize="18sp"
-        android:padding="8dp"/>
+        <!-- Titel -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GPS Daten"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:paddingBottom="24dp"
+            android:gravity="center"/>
 
-    <TextView
-        android:id="@+id/textSpeed"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Geschwindigkeit: -"
-        android:textSize="18sp"
-        android:padding="8dp"/>
+        <!-- Breite / Länge -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
+            android:elevation="6dp"
+            android:clipToPadding="false"
+            android:clipChildren="false"
+            android:background="@drawable/bg_rounded_white"
+            android:gravity="center">
 
-</LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Breite / Länge"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#333333"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/textLatLng"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:textSize="20sp"
+                android:textColor="#000000"
+                android:paddingTop="6dp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <!-- Höhe -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:layout_marginBottom="24dp"
+            android:elevation="6dp"
+            android:clipToPadding="false"
+            android:clipChildren="false"
+            android:background="@drawable/bg_rounded_blue"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Höhe"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#333333"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/textAltitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:textSize="20sp"
+                android:textColor="#000000"
+                android:paddingTop="6dp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <!-- Geschwindigkeit -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:layout_marginBottom="24dp"
+            android:elevation="6dp"
+            android:clipToPadding="false"
+            android:clipChildren="false"
+            android:background="@drawable/bg_rounded_white"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Geschwindigkeit"
+                android:textColor="#333333"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/textSpeed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="6dp"
+                android:text="-"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:gravity="center"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
