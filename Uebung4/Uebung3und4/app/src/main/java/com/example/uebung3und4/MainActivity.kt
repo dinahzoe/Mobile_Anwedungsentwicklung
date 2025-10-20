@@ -6,103 +6,90 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import android.widget.LinearLayout
 import android.widget.TextView
-import android.view.Gravity
-import android.view.ViewGroup.LayoutParams
+import android.view.View
+import android.widget.LinearLayout
 
 class MainActivity : Activity(), SensorEventListener {
 
-    private lateinit var sensorVerwaltung: SensorManager
-    private var beschleunigung: Sensor? = null
-    private var magnetFeld: Sensor? = null
+    private lateinit var sensorManager: SensorManager
+    private var accelerometer: Sensor? = null
+    private var magnetometer: Sensor? = null
 
-    private lateinit var rollAnzeige: TextView
-    private lateinit var neigungAnzeige: TextView
-    private lateinit var drehungAnzeige: TextView
+    private lateinit var rollText: TextView
+    private lateinit var pitchText: TextView
+    private lateinit var yawText: TextView
 
-    private var gDaten = FloatArray(3)
-    private var mDaten = FloatArray(3)
-    private var gVorhanden = false
-    private var mVorhanden = false
+    private lateinit var wasserwaage: LinearLayout
+    private lateinit var blase: View
+
+    private var gravDaten = FloatArray(3)
+    private var magnetDaten = FloatArray(3)
+    private var gravVorhanden = false
+    private var magnetVorhanden = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        // Layout direkt im Code erstellen (kein XML notwendig)
-        val anzeigeLayout = LinearLayout(this)
-        anzeigeLayout.orientation = LinearLayout.VERTICAL
-        anzeigeLayout.gravity = Gravity.CENTER
-        anzeigeLayout.setPadding(50, 50, 50, 50)
+        rollText = findViewById(R.id.textRoll)
+        pitchText = findViewById(R.id.textPitch)
+        yawText = findViewById(R.id.textYaw)
 
-        rollAnzeige = TextView(this)
-        neigungAnzeige = TextView(this)
-        drehungAnzeige = TextView(this)
+        wasserwaage = findViewById(R.id.wasserwaageLayout)
+        blase = findViewById(R.id.blase)
 
-        rollAnzeige.textSize = 24f
-        neigungAnzeige.textSize = 24f
-        drehungAnzeige.textSize = 24f
-
-        anzeigeLayout.addView(rollAnzeige, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
-        anzeigeLayout.addView(neigungAnzeige, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
-        anzeigeLayout.addView(drehungAnzeige, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
-
-        setContentView(anzeigeLayout)
-
-        // Sensoren holen
-        sensorVerwaltung = getSystemService(SENSOR_SERVICE) as SensorManager
-        beschleunigung = sensorVerwaltung.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-        magnetFeld = sensorVerwaltung.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
     }
 
     override fun onResume() {
         super.onResume()
-        beschleunigung?.let {
-            sensorVerwaltung.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
-        }
-        magnetFeld?.let {
-            sensorVerwaltung.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
-        }
+        accelerometer?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
+        magnetometer?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
     }
 
     override fun onPause() {
         super.onPause()
-        sensorVerwaltung.unregisterListener(this)
+        sensorManager.unregisterListener(this)
     }
 
-    override fun onSensorChanged(ereignis: SensorEvent) {
-        when (ereignis.sensor.type) {
+    override fun onSensorChanged(event: SensorEvent) {
+        when(event.sensor.type) {
             Sensor.TYPE_ACCELEROMETER -> {
-                gDaten = ereignis.values.clone()
-                gVorhanden = true
+                gravDaten = event.values.clone()
+                gravVorhanden = true
             }
             Sensor.TYPE_MAGNETIC_FIELD -> {
-                mDaten = ereignis.values.clone()
-                mVorhanden = true
+                magnetDaten = event.values.clone()
+                magnetVorhanden = true
             }
         }
 
-        if (gVorhanden && mVorhanden) {
+        if (gravVorhanden && magnetVorhanden) {
             val rotMatrix = FloatArray(9)
             val inklMatrix = FloatArray(9)
-            val erfolgreich = SensorManager.getRotationMatrix(rotMatrix, inklMatrix, gDaten, mDaten)
+            val success = SensorManager.getRotationMatrix(rotMatrix, inklMatrix, gravDaten, magnetDaten)
+            if (success) {
+                val orientation = FloatArray(3)
+                SensorManager.getOrientation(rotMatrix, orientation)
 
-            if (erfolgreich) {
-                val lageWinkel = FloatArray(3)
-                SensorManager.getOrientation(rotMatrix, lageWinkel)
+                val yaw = Math.toDegrees(orientation[0].toDouble())
+                val pitch = Math.toDegrees(orientation[1].toDouble())
+                val roll = Math.toDegrees(orientation[2].toDouble())
 
-                val drehWinkel = Math.toDegrees(lageWinkel[0].toDouble())  // Yaw
-                val neigungsWinkel = Math.toDegrees(lageWinkel[1].toDouble()) // Pitch
-                val rollWinkel = Math.toDegrees(lageWinkel[2].toDouble()) // Roll
+                rollText.text = "Roll: %.1f°".format(roll)
+                pitchText.text = "Pitch: %.1f°".format(pitch)
+                yawText.text = "Yaw: %.1f°".format(yaw)
 
-                rollAnzeige.text = "Roll: %.1f°".format(rollWinkel)
-                neigungAnzeige.text = "Neigung: %.1f°".format(neigungsWinkel)
-                drehungAnzeige.text = "Drehung: %.1f°".format(drehWinkel)
+                val maxVerschiebung = wasserwaage.width - blase.width
+                val prozent = (roll / 90.0).coerceIn(-1.0, 1.0)
+                blase.translationX = (prozent * maxVerschiebung / 2).toFloat()
+
             }
         }
     }
 
-    override fun onAccuracyChanged(sensor: Sensor?, genauigkeit: Int) {
-        // Genauigkeitsänderung wird hier nicht benötigt
-    }
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }
