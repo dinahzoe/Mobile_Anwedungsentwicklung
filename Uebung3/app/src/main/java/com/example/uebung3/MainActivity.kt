@@ -133,8 +133,10 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
     override fun onSensorChanged(event: SensorEvent) {
         if (event.sensor.type == Sensor.TYPE_PRESSURE) {
             lastPressure = event.values[0]
+            btnSetReference.isEnabled = true
         }
     }
+
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 
