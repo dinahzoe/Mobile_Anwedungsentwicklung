@@ -7,11 +7,16 @@ class PersistentStorage(context: Context) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("hoehenmesser_prefs", Context.MODE_PRIVATE)
 
-    fun saveReferenceAltitude(value: Float) {
-        prefs.edit().putFloat("reference_altitude", value).apply()
+    fun saveReferencePressure(value: Float) {
+        prefs.edit().putFloat("reference_pressure", value).apply()
     }
 
-    fun loadReferenceAltitude(): Float {
-        return prefs.getFloat("reference_altitude", -1f)
+    fun loadReferencePressure(): Float? {
+        return if (prefs.contains("reference_pressure")) {
+            prefs.getFloat("reference_pressure", -1f).takeIf { it >= 0f }
+        } else {
+            null
+        }
     }
 }
+

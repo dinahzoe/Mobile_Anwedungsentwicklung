@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
 
     private var googleMap: GoogleMap? = null
     private val routePoints = mutableListOf<LatLng>()
-
+    private var referencePressure: Float? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -58,87 +58,76 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
 
         storage = PersistentStorage(this)
         csvWriter = CSVWriterHelper(this)
-        referenceAltitude = storage.loadReferenceAltitude()
+        referencePressure = storage.loadReferencePressure()
 
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         pressureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE)
-
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                1
+                LOCATION_PERMISSION_REQUEST_CODE
             )
         } else {
             startGPS()
         }
 
+
+
         btnSetReference.setOnClickListener {
-            lastPressure?.let {
-                val alt = AltitudeCalculator.calculateAltitudeFromPressure(it)
-                referenceAltitude = alt.toFloat()
-                storage.saveReferenceAltitude(referenceAltitude!!)
-                Toast.makeText(this, "Referenzhöhe gespeichert: $alt m", Toast.LENGTH_SHORT).show()
+            lastPressure?.let { pressure ->
+                // Speichere den aktuellen Druck als Referenzdruck
+                referencePressure = pressure
+                storage.saveReferencePressure(pressure)
+                Toast.makeText(this, "Referenzdruck gespeichert: $pressure hPa", Toast.LENGTH_SHORT).show()
+            } ?: run {
+                Toast.makeText(this, "Kein Drucksensorwert vorhanden.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun startGPS() {
-        try {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0f, this)
-        } catch (e: SecurityException) {
-            e.printStackTrace()
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startGPS()
+            } else {
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
+            }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mapView.onResume()
-        pressureSensor?.let {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mapView.onPause()
-        sensorManager.unregisterListener(this)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mapView.onDestroy()
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        mapView.onLowMemory()
     }
 
     override fun onLocationChanged(location: Location) {
         val latitude = location.latitude
         val longitude = location.longitude
         val speedKmh = location.speed * 3.6
-        val altitude = lastPressure?.let { AltitudeCalculator.calculateAltitudeFromPressure(it, referenceAltitude) } ?: 0.0
 
-        // UI
+        val altitude = lastPressure?.let { pressure ->
+            AltitudeCalculator.calculateAltitude(pressure, referencePressure)
+        } ?: 0.0
+
         textLatLng.text = "Breite: $latitude\nLänge: $longitude"
         textAltitude.text = "Höhe: %.1f m".format(altitude)
         textSpeed.text = "Geschwindigkeit: %.2f km/h".format(speedKmh)
 
-        // CSV speichern
-        csvWriter.writeData(latitude, longitude, altitude)
+        try {
+            csvWriter.writeData(latitude, longitude, altitude)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
-        // Route auf der Map zeichnen
         val latLng = LatLng(latitude, longitude)
         routePoints.add(latLng)
         googleMap?.clear()
         googleMap?.addPolyline(PolylineOptions().addAll(routePoints).width(5f).color(0xFF0000FF.toInt()))
         googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17f))
+    }
+
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
 
     override fun onSensorChanged(event: SensorEvent) {
@@ -152,5 +141,18 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
         googleMap?.uiSettings?.isZoomControlsEnabled = true
+    }
+
+    private fun startGPS() {
+        try {
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                1000L,   // jede Sekunde
+                0f,      // jede Bewegung
+                this
+            )
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
     }
 }
