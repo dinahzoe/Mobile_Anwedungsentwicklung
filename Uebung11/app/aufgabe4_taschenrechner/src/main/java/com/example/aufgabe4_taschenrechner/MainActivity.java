@@ -45,6 +45,13 @@ public class MainActivity extends AppCompatActivity {
 
         // Gleich
         findViewById(R.id.btnEq).setOnClickListener(v -> calculate());
+
+        //CE
+        findViewById(R.id.btnCE).setOnClickListener(v -> {
+            current = "";
+            display.setText("0");
+        });
+
     }
 
     void setOperator(String op) {
