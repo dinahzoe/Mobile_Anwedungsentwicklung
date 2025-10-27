@@ -37,7 +37,8 @@ fun CalculatorApp() {
         listOf("7","8","9","/"),
         listOf("4","5","6","*"),
         listOf("1","2","3","-"),
-        listOf("0","C","=","+")
+        listOf("0","C","CE","+"),
+        listOf("=")
     )
 
     Column(
@@ -114,6 +115,10 @@ fun CalculatorApp() {
                                     current = ""
                                     firstNumber = 0.0
                                     operator = ""
+                                    display = "0"
+                                }
+                                "CE" -> {
+                                    current = ""
                                     display = "0"
                                 }
                             }
