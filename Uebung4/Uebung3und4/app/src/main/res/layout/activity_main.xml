@@ -16,13 +16,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="GPS Daten"
-            android:textSize="36sp"
+            android:text="Neigungswinkel"
+            android:textSize="34sp"
             android:textStyle="bold"
-            android:textColor="#FFFFFF"
+            android:textColor="#2196F3"
             android:paddingBottom="24dp"
-            android:gravity="center"/>
+            android:gravity="center" />
 
+        <!-- Roll -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -31,31 +32,30 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="24dp"
             android:elevation="6dp"
-            android:clipToPadding="false"
-            android:clipChildren="false"
             android:background="@drawable/bg_rounded_white"
             android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Breite / Länge"
+                android:text="Roll"
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:textColor="#333333"
-                android:gravity="center"/>
+                android:gravity="center" />
 
             <TextView
-                android:id="@+id/textLatLng"
+                android:id="@+id/textRoll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="-"
+                android:text="0.0°"
                 android:textSize="20sp"
                 android:textColor="#000000"
                 android:paddingTop="6dp"
-                android:gravity="center"/>
+                android:gravity="center" />
         </LinearLayout>
 
+        <!-- Pitch -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -63,31 +63,30 @@
             android:padding="20dp"
             android:layout_marginBottom="24dp"
             android:elevation="6dp"
-            android:clipToPadding="false"
-            android:clipChildren="false"
             android:background="@drawable/bg_rounded_blue"
             android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Höhe"
+                android:text="Pitch"
                 android:textStyle="bold"
                 android:textSize="18sp"
                 android:textColor="#333333"
-                android:gravity="center"/>
+                android:gravity="center" />
 
             <TextView
-                android:id="@+id/textAltitude"
+                android:id="@+id/textPitch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="-"
+                android:text="0.0°"
                 android:textSize="20sp"
                 android:textColor="#000000"
                 android:paddingTop="6dp"
-                android:gravity="center"/>
+                android:gravity="center" />
         </LinearLayout>
 
+        <!-- Yaw -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -95,50 +94,47 @@
             android:padding="20dp"
             android:layout_marginBottom="24dp"
             android:elevation="6dp"
-            android:clipToPadding="false"
-            android:clipChildren="false"
             android:background="@drawable/bg_rounded_white"
             android:gravity="center">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Geschwindigkeit"
-                android:textColor="#333333"
-                android:textSize="18sp"
+                android:text="Yaw"
                 android:textStyle="bold"
-                android:gravity="center"/>
+                android:textSize="18sp"
+                android:textColor="#333333"
+                android:gravity="center" />
 
             <TextView
-                android:id="@+id/textSpeed"
+                android:id="@+id/textYaw"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="6dp"
-                android:text="-"
-                android:textColor="#000000"
+                android:text="0.0°"
                 android:textSize="20sp"
-                android:gravity="center"/>
+                android:textColor="#000000"
+                android:paddingTop="6dp"
+                android:gravity="center" />
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnSetReference"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="26dp"
-            android:backgroundTint="#4F9CD7"
-            android:padding="26dp"
-            android:text="Referenzhöhe speichern"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp" />
+        <LinearLayout
+            android:id="@+id/wasserwaageLayout"
+            android:layout_width="300dp"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:background="#9BCAF0"
+            android:layout_marginTop="24dp"
+            android:gravity="center_vertical"
+            android:elevation="6dp">
 
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/mapView"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginTop="16dp"
-            android:contentDescription="Karte mit Route auf dem Campus" />
+            <ImageView
+                android:id="@+id/blase"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/heart"
+                android:contentDescription="Herz" />
 
+        </LinearLayout>
 
 
     </LinearLayout>
