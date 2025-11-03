@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.hoehenmesser.ui.theme.HoehenmesserTheme
@@ -32,7 +31,7 @@ import kotlin.math.pow
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
-    private val p0 = 1013.25f // Standard-Luftdruck auf Meereshöhe
+    private val p0 = 1013.25f // Standard Luftdruck auf Meereshöhe
 
     private lateinit var sensorManager: SensorManager
     private var pressureSensor: Sensor? = null
@@ -56,7 +55,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // UI-Update alle 200ms
                     LaunchedEffect(Unit) {
                         while (true) {
                             val currentPressure = manualPressure ?: lastPressure
@@ -74,9 +72,9 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                         pressure = pressureState.value,
                         altitude = altitudeState.value,
                         onSetKnownHeight = { knownHeight ->
-                            // Höhe exakt übernehmen
+                            // Höhe wird exakt übernommen
                             altitudeState.value = knownHeight
-                            // Luftdruck passend zur eingegebenen Höhe berechnen
+                            // Luftdruck für eingegebenen Höhe berechnen
                             manualPressure = (p0 * (1 - (knownHeight / 44330.0)).pow(5.255)).toFloat()
                         }
                     )
@@ -153,7 +151,7 @@ fun HoehenmesserView(
                 )
             }
 
-            // Messwerte Anzeige
+            // Messwert Anzeige
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.weight(1f),
@@ -325,17 +323,5 @@ fun HoehenmesserView(
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HoehenmesserPreview() {
-    HoehenmesserTheme {
-        HoehenmesserView(
-            pressure = 1005.3f,
-            altitude = 250.0,
-            onSetKnownHeight = {}
-        )
     }
 }
