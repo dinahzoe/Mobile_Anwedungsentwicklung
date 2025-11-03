@@ -1,4 +1,4 @@
-package com.example.aufgabe1;
+package com.example.aufgabe1
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -6,7 +6,10 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -16,14 +19,15 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private var textAltitude: TextView? = null
     private var textSpeed: TextView? = null
     private var locationManager: LocationManager? = null
+    private var currentProvider: String = LocationManager.GPS_PROVIDER
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        textLatLng = findViewById<TextView?>(R.id.textLatLng)
-        textAltitude = findViewById<TextView?>(R.id.textAltitude)
-        textSpeed = findViewById<TextView?>(R.id.textSpeed)
+        textLatLng = findViewById(R.id.textLatLng)
+        textAltitude = findViewById(R.id.textAltitude)
+        textSpeed = findViewById(R.id.textSpeed)
 
         locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
 
@@ -33,31 +37,95 @@ class MainActivity : AppCompatActivity(), LocationListener {
         ) {
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf<String>(Manifest.permission.ACCESS_FINE_LOCATION),
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
                 LOCATION_PERMISSION_REQUEST_CODE
             )
         } else {
-            startGPS()
+            startLocationUpdates(currentProvider)
         }
     }
 
-    private fun startGPS() {
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.title.toString()) {
+            "GPS Provider" -> {
+                switchProvider(LocationManager.GPS_PROVIDER)
+                true
+            }
+            "Network Provider" -> {
+                switchProvider(LocationManager.NETWORK_PROVIDER)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun switchProvider(provider: String) {
+        // Stoppe aktuelle Location-Updates
         try {
-            locationManager!!.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0f, this)
+            locationManager?.removeUpdates(this)
         } catch (e: SecurityException) {
             e.printStackTrace()
+        }
+
+        // Setze neuen Provider
+        currentProvider = provider
+
+        // Prüfe, ob Provider verfügbar ist
+        val isEnabled = locationManager?.isProviderEnabled(provider) ?: false
+
+        if (!isEnabled) {
+            val providerName = if (provider == LocationManager.GPS_PROVIDER) "GPS" else "Network"
+            Toast.makeText(
+                this,
+                "$providerName Provider ist nicht aktiviert!",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+
+        // Zeige welcher Provider gewählt wurde
+        val providerName = if (provider == LocationManager.GPS_PROVIDER) "GPS" else "Network"
+        Toast.makeText(this, "$providerName Provider ausgewählt", Toast.LENGTH_SHORT).show()
+
+        // Starte Location-Updates mit neuem Provider
+        startLocationUpdates(provider)
+    }
+
+    private fun startLocationUpdates(provider: String) {
+        try {
+            // GPS Provider benötigt ACCESS_FINE_LOCATION
+            // Network Provider benötigt ACCESS_COARSE_LOCATION (oder FINE)
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+                locationManager?.requestLocationUpdates(provider, 1000, 0f, this)
+
+                // Zeige letzte bekannte Position sofort an
+                val lastLocation = locationManager?.getLastKnownLocation(provider)
+                lastLocation?.let { onLocationChanged(it) }
+            }
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+            Toast.makeText(this, "Keine Berechtigung für Standortzugriff", Toast.LENGTH_SHORT).show()
         }
     }
 
     override fun onLocationChanged(location: Location) {
-        val latitude = location.getLatitude()
-        val longitude = location.getLongitude()
-        val altitude = location.getAltitude()
-        val speed = location.getSpeed() // m/s
+        val latitude = location.latitude
+        val longitude = location.longitude
+        val altitude = location.altitude
+        val speed = location.speed // m/s
 
-        textLatLng!!.setText("Breite: " + latitude + "\nLänge: " + longitude)
-        textAltitude!!.setText("Höhe: " + altitude + " m")
-        textSpeed!!.setText("Geschwindigkeit: " + String.format("%.2f km/h", speed * 3.6))
+        textLatLng?.text = "Breite: $latitude\nLänge: $longitude"
+        textAltitude?.text = "Höhe: $altitude m"
+        textSpeed?.text = "Geschwindigkeit: ${String.format("%.2f", speed * 3.6)} km/h"
     }
 
     override fun onRequestPermissionsResult(
@@ -70,10 +138,18 @@ class MainActivity : AppCompatActivity(), LocationListener {
             grantResults.isNotEmpty() &&
             grantResults[0] == PackageManager.PERMISSION_GRANTED
         ) {
-            startGPS()
+            startLocationUpdates(currentProvider)
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            locationManager?.removeUpdates(this)
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+    }
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
