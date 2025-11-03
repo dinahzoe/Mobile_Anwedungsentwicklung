@@ -8,12 +8,19 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,8 +52,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
         setContent {
             HoehenmesserTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
                     // UI-Update alle 200ms
                     LaunchedEffect(Unit) {
                         while (true) {
@@ -105,69 +114,219 @@ fun HoehenmesserView(
 ) {
     var inputText by remember { mutableStateOf("") }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly // gleichmäßige Verteilung
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        // verlauf von Hellblau zu weiß
+                        Color(0xFF3B82F6),
+                        Color(0xFFFFFFFF)
+                    )
+                )
+            )
     ) {
-        // Titel
-        Text(
-            text = "Luftdruck berechnen",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        // Eingabefeld für Höhe
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .statusBarsPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement =  Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Höhe eingeben (m)",
-                fontSize = 18.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = inputText,
-                onValueChange = { inputText = it },
-                placeholder = { Text("z.B. 250") },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                modifier = Modifier.width(200.dp)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(
-                onClick = {
-                    inputText.toDoubleOrNull()?.let {
-                        onSetKnownHeight(it)
-                        inputText = ""
-                    }
-                },
-                enabled = inputText.isNotBlank()
+            // Titel
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(top = 28.dp)
             ) {
-                Text("Höhe übernehmen")
+                Text(
+                    text = "⛰️",
+                    fontSize = 44.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Höhenmesser",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
             }
-        }
 
-        // Ergebnis: Luftdruck
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = if (altitude != null) "Höhe: %.1f m".format(altitude) else "Höhe: –",
-                fontSize = 24.sp
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = if (pressure != null) "Luftdruck: %.2f hPa".format(pressure) else "Luftdruck: –",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
+            // Messwerte Anzeige
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                // Höhen Anzeige
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(8.dp, RoundedCornerShape(20.dp)),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "AKTUELLE HÖHE",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Gray,
+                            letterSpacing = 1.5.sp
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = if (altitude != null) "%.1f".format(altitude) else "–",
+                            fontSize = 56.sp,
+                            fontWeight = FontWeight.Bold,
+                            color =  Color(0xFF3B82F6)
+                        )
+                        Text(
+                            text = "Meter",
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Luftdruck Anzeige
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(8.dp, RoundedCornerShape(20.dp)),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "LUFTDRUCK",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color.Gray,
+                            letterSpacing = 1.5.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = if (pressure != null) "%.2f hPa".format(pressure) else "– hPa",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF3B82F6)
+                        )
+                    }
+                }
+            }
+
+            // Kalibrierung Anzeige
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+                    .shadow(8.dp, RoundedCornerShape(20.dp)),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Kalibrierung",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF3B82F6)
+                    )
+                    Text(
+                        text = "Neue Höhe eingeben",
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = inputText,
+                            onValueChange = { inputText = it },
+                            placeholder = {
+                                Text(
+                                    "z.B. 250",
+                                    color = Color.Gray.copy(alpha = 0.5f)
+                                )
+                            },
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                keyboardType = KeyboardType.Decimal
+                            ),
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color(0xFF3B82F6),
+                                unfocusedBorderColor = Color.LightGray
+                            ),
+                            suffix = {
+                                Text(
+                                    "m",
+                                    color = Color.Gray,
+                                    fontSize = 14.sp
+                                )
+                            }
+                        )
+
+                        Button(
+                            onClick = {
+                                inputText.replace(',', '.').toDoubleOrNull()?.let {
+                                    onSetKnownHeight(it)
+                                    inputText = ""
+                                }
+                            },
+                            enabled = inputText.isNotBlank(),
+                            modifier = Modifier
+                                .size(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF3B82F6),
+                                disabledContainerColor = Color.LightGray
+                            ),
+                            contentPadding = PaddingValues(0.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Übernehmen",
+                                tint = Color.White
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
