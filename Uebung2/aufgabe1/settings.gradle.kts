@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "aufgabe1"
 include(":app")
-include(":Uebung4_3_4")
+
