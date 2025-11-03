@@ -53,13 +53,33 @@ class MainActivity : AppCompatActivity(), LocationListener {
         return true
     }
 
+    // Hier setzen wir das Häkchen dynamisch vor jedem Anzeigen des Menüs
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menu?.let {
+            for (i in 0 until menu.size()) {
+                val item = menu.getItem(i)
+                val isActive = (item.title.toString().contains("GPS") && currentProvider == LocationManager.GPS_PROVIDER) ||
+                        (item.title.toString().contains("Network") && currentProvider == LocationManager.NETWORK_PROVIDER)
+
+                // Zeige grünes Häkchen hinter dem aktiven Provider
+                val baseTitle = if (item.title.toString().contains("✔")) {
+                    item.title.toString().substringBefore("✔").trim()
+                } else {
+                    item.title.toString()
+                }
+                item.title = if (isActive) "$baseTitle ✔" else baseTitle
+            }
+        }
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.title.toString()) {
-            "GPS Provider" -> {
+        return when {
+            item.title.toString().contains("GPS") -> {
                 switchProvider(LocationManager.GPS_PROVIDER)
                 true
             }
-            "Network Provider" -> {
+            item.title.toString().contains("Network") -> {
                 switchProvider(LocationManager.NETWORK_PROVIDER)
                 true
             }
@@ -96,6 +116,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
         // Starte Location-Updates mit neuem Provider
         startLocationUpdates(provider)
+
+        // Menü neu zeichnen, damit das Häkchen aktualisiert wird
+        invalidateOptionsMenu()
     }
 
     private fun startLocationUpdates(provider: String) {
