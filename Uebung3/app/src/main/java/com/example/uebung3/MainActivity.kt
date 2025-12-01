@@ -1,6 +1,7 @@
 package com.example.uebung3
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -16,6 +17,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapView
@@ -30,6 +32,7 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
     private lateinit var textAltitude: TextView
     private lateinit var textSpeed: TextView
     private lateinit var btnSetReference: Button
+    private lateinit var btnExportGPX: Button
     private lateinit var mapView: MapView
 
     private lateinit var locationManager: LocationManager
@@ -41,12 +44,16 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
     private var referenceAltitude: Float? = null
 
     private lateinit var csvWriter: CSVWriterHelper
+    private lateinit var gpxWriter: GPXWriter
 
     private var googleMap: GoogleMap? = null
     private val routePoints = mutableListOf<LatLng>()
 
     private lateinit var graphView: GraphView
     private var referencePressure: Float? = null
+    private val utmTrackPoints = mutableListOf<UTMPoint>()
+    private val converter = UTMConverter()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -55,12 +62,14 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
         textAltitude = findViewById(R.id.textAltitude)
         textSpeed = findViewById(R.id.textSpeed)
         btnSetReference = findViewById(R.id.btnSetReference)
+        btnExportGPX = findViewById(R.id.btnExportGPX)
         mapView = findViewById(R.id.mapView)
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync(this)
 
         storage = PersistentStorage(this)
         csvWriter = CSVWriterHelper(this)
+        gpxWriter = GPXWriter(this)
         referencePressure = storage.loadReferencePressure()
 
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
@@ -97,11 +106,49 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
                 Toast.makeText(this, "Keine GPS-Höhe verfügbar.", Toast.LENGTH_SHORT).show()
             }
         }
-
+        btnExportGPX.setOnClickListener {
+            exportGPX()
+        }
         graphView = findViewById(R.id.graphView)
         val trackPoints = loadUTMTrack()
         graphView.setTrack(trackPoints)
     }
+
+    private fun exportGPX() {
+        val gpxFile = gpxWriter.exportFromCSV()
+
+        if (gpxFile != null) {
+            Toast.makeText(this, "GPX-Datei erstellt: ${gpxFile.name}", Toast.LENGTH_LONG).show()
+
+            // Datei teilen/öffnen
+            shareGPXFile(gpxFile)
+        } else {
+            Toast.makeText(this, "Keine GPS-Daten zum Exportieren vorhanden.", Toast.LENGTH_SHORT).show()
+        }
+    }
+    private fun shareGPXFile(file: File) {
+        try {
+            val uri = FileProvider.getUriForFile(
+                this,
+                "${applicationContext.packageName}.provider",
+                file
+            )
+
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "application/gpx+xml"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                putExtra(Intent.EXTRA_SUBJECT, "GPS Track")
+                putExtra(Intent.EXTRA_TEXT, "Meine GPS-Route")
+            }
+
+            startActivity(Intent.createChooser(intent, "GPX-Datei teilen"))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "Fehler beim Teilen der Datei: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)

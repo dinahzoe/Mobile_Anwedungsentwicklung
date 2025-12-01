@@ -132,6 +132,18 @@
             android:textColor="#FFFFFF"
             android:textSize="20sp" />
 
+        <Button
+            android:id="@+id/btnExportGPX"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#4F7CD7"
+            android:padding="26dp"
+            android:text="Als GPX exportieren"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
+
         <com.google.android.gms.maps.MapView
             android:id="@+id/mapView"
             android:layout_width="match_parent"
