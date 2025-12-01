@@ -1,6 +1,7 @@
 package com.example.uebung3
 
 import android.content.Context
+import android.os.Environment
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -64,7 +65,12 @@ class GPXWriter(private val context: Context) {
     }
 
     fun exportFromCSV(csvFilename: String = "gps_log.csv"): File? {
-        val csvFile = File(context.filesDir, csvFilename)
+
+        val csvFile = File(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            csvFilename
+        )
+
         if (!csvFile.exists()) {
             return null
         }

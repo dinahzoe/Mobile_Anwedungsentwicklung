@@ -11,6 +11,8 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -170,12 +172,14 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
             AltitudeCalculator.calculateAltitude(pressure, referencePressure)
         } ?: location.altitude
 
+        Log.d("GPS_DEBUG", "Neue GPS-Daten empfangen -> Lat: $latitude, Lon: $longitude, Alt: $altitude, Speed: $speedKmh")
+
         textLatLng.text = "Breite: $latitude\nLänge: $longitude"
         textAltitude.text = "Höhe: %.1f m".format(altitude)
         textSpeed.text = "Geschwindigkeit: %.2f km/h".format(speedKmh)
 
         try {
-            csvWriter.writeData(latitude, longitude, altitude)
+            csvWriter.writeCSV(latitude, longitude, altitude)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -229,7 +233,8 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
     }
 
     private fun loadUTMTrack(): List<UTMPoint> {
-        val csvFile = File(filesDir, "gps_log.csv")
+        //val csvFile = File(getExternalFilesDir(null), "gps_log.csv")
+        val csvFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "gps_log.csv")
         val points = mutableListOf<UTMPoint>()
         if (csvFile.exists()) {
             val converter = UTMConverter()
