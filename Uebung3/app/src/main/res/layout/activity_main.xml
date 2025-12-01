@@ -139,6 +139,13 @@
             android:layout_marginTop="16dp"
             android:contentDescription="Karte mit Route auf dem Campus" />
 
+        <com.example.uebung3.GraphView
+            android:id="@+id/graphView"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginTop="16dp"
+            android:background="#FFFFFFFF"/>
+
 
 
     </LinearLayout>

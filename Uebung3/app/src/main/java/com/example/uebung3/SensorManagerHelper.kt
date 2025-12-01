@@ -18,5 +18,18 @@ class PersistentStorage(context: Context) {
             null
         }
     }
+
+    // GPS Höhe -> Unsere Handys haben keinen druck sensor
+    fun saveReferenceAltitude(value: Float) {
+        prefs.edit().putFloat("reference_altitude", value).apply()
+    }
+
+    fun loadReferenceAltitude(): Float? {
+        return if (prefs.contains("reference_altitude")) {
+            prefs.getFloat("reference_altitude", -1f).takeIf { it >= 0f }
+        } else {
+            null
+        }
+    }
 }
 

@@ -22,6 +22,7 @@ import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
+import java.io.File
 
 class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener, OnMapReadyCallback {
 
@@ -43,6 +44,8 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
 
     private var googleMap: GoogleMap? = null
     private val routePoints = mutableListOf<LatLng>()
+
+    private lateinit var graphView: GraphView
     private var referencePressure: Float? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,15 +81,26 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
 
 
         btnSetReference.setOnClickListener {
-            lastPressure?.let { pressure ->
-                // Speichere den aktuellen Druck als Referenzdruck
-                referencePressure = pressure
-                storage.saveReferencePressure(pressure)
-                Toast.makeText(this, "Referenzdruck gespeichert: $pressure hPa", Toast.LENGTH_SHORT).show()
+//            lastPressure?.let { pressure ->
+//                // Speichere den aktuellen Druck als Referenzdruck
+//                referencePressure = pressure
+//                storage.saveReferencePressure(pressure)
+//                Toast.makeText(this, "Referenzdruck gespeichert: $pressure hPa", Toast.LENGTH_SHORT).show()
+//            } ?: run {
+//                Toast.makeText(this, "Kein Drucksensorwert vorhanden.", Toast.LENGTH_SHORT).show()
+//            }
+            val currentAltitude = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)?.altitude
+            currentAltitude?.let { altitude ->
+                storage.saveReferenceAltitude(altitude.toFloat())
+                Toast.makeText(this, "Referenzhöhe gespeichert: $altitude m", Toast.LENGTH_SHORT).show()
             } ?: run {
-                Toast.makeText(this, "Kein Drucksensorwert vorhanden.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Keine GPS-Höhe verfügbar.", Toast.LENGTH_SHORT).show()
             }
         }
+
+        graphView = findViewById(R.id.graphView)
+        val trackPoints = loadUTMTrack()
+        graphView.setTrack(trackPoints)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -107,7 +121,7 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
 
         val altitude = lastPressure?.let { pressure ->
             AltitudeCalculator.calculateAltitude(pressure, referencePressure)
-        } ?: 0.0
+        } ?: location.altitude
 
         textLatLng.text = "Breite: $latitude\nLänge: $longitude"
         textAltitude.text = "Höhe: %.1f m".format(altitude)
@@ -119,11 +133,20 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
             e.printStackTrace()
         }
 
+        // Map aktualisieren
         val latLng = LatLng(latitude, longitude)
         routePoints.add(latLng)
         googleMap?.clear()
         googleMap?.addPolyline(PolylineOptions().addAll(routePoints).width(5f).color(0xFF0000FF.toInt()))
         googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 17f))
+
+        // Graph aktualisieren
+        val converter = UTMConverter()
+        val utmPoint = converter.toUTM(latitude, longitude)
+        val currentPoints = mutableListOf<UTMPoint>()
+        currentPoints.addAll(loadUTMTrack())  // bisher gespeicherte Punkte
+        currentPoints.add(utmPoint)           // neuen Punkt hinzufügen
+        graphView.setTrack(currentPoints)
     }
 
     companion object {
@@ -157,4 +180,24 @@ class MainActivity : AppCompatActivity(), LocationListener, SensorEventListener,
             e.printStackTrace()
         }
     }
+
+    private fun loadUTMTrack(): List<UTMPoint> {
+        val csvFile = File(filesDir, "gps_log.csv")
+        val points = mutableListOf<UTMPoint>()
+        if (csvFile.exists()) {
+            val converter = UTMConverter()
+            csvFile.forEachLine { line ->
+                val parts = line.split(";")
+                if (parts.size >= 4) {
+                    val lat = parts[1].toDoubleOrNull()
+                    val lon = parts[2].toDoubleOrNull()
+                    if (lat != null && lon != null) {
+                        points.add(converter.toUTM(lat, lon))
+                    }
+                }
+            }
+        }
+        return points
+    }
+
 }
